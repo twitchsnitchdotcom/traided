@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.vaadin.spring.tutorial.dto.RecipientDTO;
+import org.vaadin.spring.tutorial.dto.RecipientSearchRequest;
 
 import javax.annotation.PostConstruct;
 import java.util.Collections;
@@ -60,6 +61,28 @@ public class ImporterService {
         logResultSummaries("dropDatabase", run);
     }
 
+    public void importRecipientRecords(int totalPages){
+        for(int i=1; i<= totalPages; i++){
+            RecipientSearchRequest recipientSearchRequest = new RecipientSearchRequest(i);
+            RecipientDTO recipientDTO = runGetReciept(recipientSearchRequest);
+            persistRecipient(recipientDTO.getMap());
+        }
+    }
+
+    public void persistRecipient(Map jsonMap){
+        ResultSummary run = client.query("UNWIND $json.results as result\n" +
+                        "MATCH (r:Recipient{id:result.id})\n" +
+                        "            SET     r.duns = result.duns,\n" +
+                        "                    r.uei = result.uei,\n" +
+                        "                    r.name = result.name,\n" +
+                        "                    r.recipient_level = result.recipient_level,\n" +
+                        "                    r.amount = result.amount;").in(database)
+                .bind(jsonMap).to("json")
+                .run();
+
+        logResultSummaries("persistRecipient", run);
+    }
+
 
     public HttpEntity getGenericHttpRequest() {
         // create headers
@@ -72,13 +95,20 @@ public class ImporterService {
         return request;
     }
 
-    public RecipientDTO runGetTopGame() {
+    public RecipientDTO runGetReciept(RecipientSearchRequest recipientSearchRequest) {
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        // build the request
+        HttpEntity<RecipientSearchRequest> entity = new HttpEntity<>(recipientSearchRequest, headers);
+
         String url = "https://api.usaspending.gov/api/v2/recipient/";
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<String> response = restTemplate.postForEntity(
                     url,
-                    HttpMethod.GET,
-                    getGenericHttpRequest(),
+                    entity,
                     String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
