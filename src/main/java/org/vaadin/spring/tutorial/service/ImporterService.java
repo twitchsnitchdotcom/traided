@@ -74,7 +74,7 @@ public class ImporterService {
         List<String> allRecipientsWithOutEntityInfo = getAllRecipientsWithOutEntityInfo();
         for(String id: allRecipientsWithOutEntityInfo){
             EntityDTO entityDTO = runGetEntity(id);
-            persistEntityInfo(entityDTO);
+            persistEntityInfo(entityDTO.getMap());
         }
     }
 
@@ -146,7 +146,7 @@ public class ImporterService {
 
      * @param jsonMap
      */
-    public void persistEntityInfo(EntityDTO jsonMap){
+    public void persistEntityInfo(Map jsonMap){
         ResultSummary run = client.query(
                         "MATCH (r:Recipient{id:$json.recipient_id})\n" +
                         "            SET     r.total_transactions = $json.total_transactions,\n" +
