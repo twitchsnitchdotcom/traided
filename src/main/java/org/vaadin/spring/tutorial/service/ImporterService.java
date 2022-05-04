@@ -16,14 +16,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.neo4j.core.Neo4jClient;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.vaadin.spring.tutorial.dto.RecipientDTO;
-import org.vaadin.spring.tutorial.dto.RecipientSearchRequest;
+import org.vaadin.spring.tutorial.dto.entity.EntityDTO;
+import org.vaadin.spring.tutorial.dto.recipient.RecipientDTO;
+import org.vaadin.spring.tutorial.dto.recipient.RecipientSearchRequest;
 
 import javax.annotation.PostConstruct;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class ImporterService {
@@ -69,6 +70,95 @@ public class ImporterService {
         }
     }
 
+    public void importEntityRecords(){
+        List<String> allRecipientsWithOutEntityInfo = getAllRecipientsWithOutEntityInfo();
+        for(String id: allRecipientsWithOutEntityInfo){
+            EntityDTO entityDTO = runGetEntity(id);
+            persistEntityInfo(entityDTO);
+        }
+    }
+
+
+
+    //todo complete this
+
+    /**
+
+     {
+     "name": "ACTION FACILITIES MANAGEMENT, INC.",
+     "alternate_names": [
+     "ACTION FACILITIES MANAGEMENT  INC.",
+     "ACTION FACILITIES MANAGEMENT INC",
+     "ACTION FACILITIES MANAGEMENT INCORPORATED",
+     "ACTION INTEGRATED SERVICES  LLC"
+     ],
+     "duns": "129304551",
+     "uei": "HB9HZZ9R8AX4",
+     "recipient_id": "f0b5ad28-54d1-49a3-e86c-e3dd896cce70-P",
+     "recipient_level": "P",
+     "parent_id": "f0b5ad28-54d1-49a3-e86c-e3dd896cce70-P",
+     "parent_name": "ACTION FACILITIES MANAGEMENT, INC.",
+     "parent_duns": "129304551",
+     "parent_uei": "HB9HZZ9R8AX4",
+     "parents": [
+     {
+     "parent_id": "f0b5ad28-54d1-49a3-e86c-e3dd896cce70-P",
+     "parent_duns": "129304551",
+     "parent_uei": "HB9HZZ9R8AX4",
+     "parent_name": "ACTION FACILITIES MANAGEMENT, INC."
+     }
+     ],
+     "business_types": [
+     "black_american_owned_business",
+     "category_business",
+     "corporate_entity_not_tax_exempt",
+     "dot_certified_disadvantaged_business_enterprise",
+     "economically_disadvantaged_women_owned_small_business",
+     "minority_owned_business",
+     "self_certified_small_disadvanted_business",
+     "small_business",
+     "special_designations",
+     "subchapter_s_corporation",
+     "us_owned_business",
+     "woman_owned_business",
+     "women_owned_small_business"
+     ],
+     "location": {
+     "address_line1": "115 MALONE DR",
+     "address_line2": null,
+     "address_line3": null,
+     "foreign_province": null,
+     "city_name": "MORGANTOWN",
+     "county_name": null,
+     "state_code": "WV",
+     "zip": "26501",
+     "zip4": "2283",
+     "foreign_postal_code": null,
+     "country_name": "UNITED STATES",
+     "country_code": "USA",
+     "congressional_code": "01"
+     },
+     "total_transaction_amount": 31194306.2,
+     "total_transactions": 260,
+     "total_face_value_loan_amount": 0.0,
+     "total_face_value_loan_transactions": 0
+     }
+
+     * @param jsonMap
+     */
+    public void persistEntityInfo(EntityDTO jsonMap){
+        ResultSummary run = client.query(
+                        "MATCH (r:Recipient{id:$json.recipient_id})\n" +
+                        "            SET     r.total_transactions = $json.total_transactions,\n" +
+                        "                    r.total_face_value_loan_amount = $json.total_face_value_loan_amount,\n" +
+                        "                    r.total_face_value_loan_transactions = $json.total_face_value_loan_transactions\n" +
+                        "                    ;").in(database)
+                .bind(jsonMap).to("json")
+                .run();
+
+        logResultSummaries("persistEntityInfo", run);
+    }
+
     public void persistRecipient(Map jsonMap){
         ResultSummary run = client.query("UNWIND $json.results as result\n" +
                         "MATCH (r:Recipient{id:result.id})\n" +
@@ -83,6 +173,21 @@ public class ImporterService {
         logResultSummaries("persistRecipient", run);
     }
 
+    public List<String> getAllRecipientsWithOutEntityInfo(){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        List<String> allRecipients = new ArrayList<>();
+        Collection<Map<String, Object>> all = client.query("MATCH (r:Recipient) RETURN r.id").in(database).fetch().all();
+        for (Map<String, Object> objectMap : all) {
+            for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+                allRecipients.add((String) entry.getValue());
+            }
+        }
+        stopWatch.stop();
+        log.trace("Get all recipient ids: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        return allRecipients;
+    }
+
 
     public HttpEntity getGenericHttpRequest() {
         // create headers
@@ -93,6 +198,31 @@ public class ImporterService {
         HttpEntity request = new HttpEntity(headers);
 
         return request;
+    }
+
+    public EntityDTO runGetEntity(String id){
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        // build the request
+        HttpEntity<RecipientSearchRequest> entity = new HttpEntity<>(headers);
+
+        String url = "https://api.usaspending.gov/api/v2/recipient/" + id + "/";
+        try {
+            ResponseEntity<String> response = restTemplate.getForEntity(
+                    url,
+                    String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                EntityDTO entityDTO = objectMapper().readValue(response.getBody(), EntityDTO.class);
+                entityDTO.setMap(objectMapper().readValue(response.getBody(), Map.class));
+                return entityDTO;
+            }
+        } catch (HttpClientErrorException | JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public RecipientDTO runGetReciept(RecipientSearchRequest recipientSearchRequest) {

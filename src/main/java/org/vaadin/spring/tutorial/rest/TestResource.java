@@ -20,5 +20,6 @@ public class TestResource {
     @GetMapping("/recipient")
     public void importRecipientRecords(){
         importerService.importRecipientRecords(5);
+        importerService.importEntityRecords();
     }
 }

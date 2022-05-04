@@ -1,5 +1,5 @@
 
-package org.vaadin.spring.tutorial.dto;
+package org.vaadin.spring.tutorial.dto.recipient;
 
 import java.util.HashMap;
 import java.util.List;

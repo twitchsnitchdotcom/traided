@@ -1,4 +1,4 @@
-package org.vaadin.spring.tutorial.dto;
+package org.vaadin.spring.tutorial.dto.recipient;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
