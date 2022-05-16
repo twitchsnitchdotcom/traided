@@ -19,7 +19,7 @@ public class TestResource {
 
     @GetMapping("/recipient")
     public void importRecipientRecords(){
-        importerService.deleteDBData();
+        //importerService.deleteDBData();
         importerService.importRecipientRecords(1);
     }
 }

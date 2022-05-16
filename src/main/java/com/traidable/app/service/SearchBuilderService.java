@@ -12,17 +12,17 @@ public class SearchBuilderService {
 
     private final static Logger log = LoggerFactory.getLogger(SearchBuilderService.class);
 
-    private SimpleDateFormat
+    //private SimpleDateFormat
 
     /**
      {"filters":{"recipient_id":"f0b5ad28-54d1-49a3-e86c-e3dd896cce70-P","time_period":[{"start_date":"2021-05-02","end_date":"2022-05-02"}]},"category":"awarding_agency","limit":100,"page":1}
      * @return
      */
     public static AwardingAgencyRequestDTO getAwardingAgencyRequestDTOOneYear(String recipientId){
-
+        return null;
     }
 
     public static AwardingAgencyRequestDTO getAwardingAgencyRequestDTO(){
-
+        return null;
     }
 }

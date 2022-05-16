@@ -82,13 +82,13 @@ public class ImporterService {
             recipientSearchRequest.setLimit(5);
 
             RecipientsDTO recipientsDTO = runGetReceipt(recipientSearchRequest);
-            persistRecipient(recipientsDTO.getMap());
+            //persistRecipient(recipientsDTO.getMap());
 
             for(Result result: recipientsDTO.getResults()){
 
                 //entity info
                 EntityDTO entityDTO = runGetEntity(result.getId());
-                persistEntityInfo(entityDTO.getMap());
+                //persistEntityInfo(entityDTO.getMap());
 
                 //spending info
 
