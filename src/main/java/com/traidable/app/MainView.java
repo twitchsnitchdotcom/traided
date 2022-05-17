@@ -35,7 +35,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouterLink;
 
 @Route
-public class MainView extends VerticalLayout implements LocaleChangeObserver {
+public class MainView extends VerticalLayout {
 
     private RouterLink link;
 
@@ -93,10 +93,10 @@ public class MainView extends VerticalLayout implements LocaleChangeObserver {
 
     }
 
-    @Override
-    public void localeChange(LocaleChangeEvent event) {
-        link.setText(
-                getTranslation("root.navigate_to_component"));
-    }
+//    @Override
+//    public void localeChange(LocaleChangeEvent event) {
+//        link.setText(
+//                getTranslation("root.navigate_to_component"));
+//    }
 
 }
