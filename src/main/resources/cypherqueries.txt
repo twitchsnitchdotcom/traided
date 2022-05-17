@@ -1,36 +1,4 @@
 
-SUBMISSION PERIOD:  GENERAL:
-
-https://api.usaspending.gov/api/v2/references/submission_periods/
-
-       {
-            "period_start_date": "2022-03-01T00:00:00Z",
-            "period_end_date": "2022-03-31T00:00:00Z",
-            "submission_start_date": "2022-04-19T00:00:00Z",
-            "submission_due_date": "2022-04-29T00:00:00Z",
-            "certification_due_date": "2022-05-17T00:00:00Z",
-            "submission_reveal_date": "2022-04-29T01:41:09.474018Z",
-            "submission_fiscal_year": 2022,
-            "submission_fiscal_quarter": 2,
-            "submission_fiscal_month": 6,
-            "is_quarter": false
-        }
-
-CALL apoc.load.jsonParams("https://api.usaspending.gov/api/v2/references/submission_periods/",{Accept: "application/json"}, null) YIELD value
-UNWIND  value.available_periods as period
-CREATE (sp:SubmissionPeriod)
-SET sp.period_start_date = datetime(period.period_start_date),
-sp.period_end_date = datetime(period.period_end_date),
-sp.submission_start_date = datetime(period.submission_start_date),
-sp.submission_due_date = datetime(period.submission_due_date),
-sp.certification_due_date = datetime(period.certification_due_date),
-sp.submission_reveal_date = datetime(period.submission_reveal_date),
-sp.submission_fiscal_year = period.submission_fiscal_year,
-sp.submission_fiscal_quarter = period.submission_fiscal_quarter,
-sp.submission_fiscal_month = period.submission_fiscal_month,
-sp.is_quarter = period.is_quarter
-
-
 -----------------------------------------------------------------------------------------------------------
 SUBAGENCY COUNT:
 

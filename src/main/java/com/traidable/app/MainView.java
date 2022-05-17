@@ -104,8 +104,7 @@ public class MainView extends VerticalLayout {
         agencyInfo.setText("Number of Agencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
 
         Div subAgencyInfo = new Div();
-        subAgencyInfo.setText("Number of SubAgencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
-
+        //subAgencyInfo.setText("Number of SubAgencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
 
         Button importTopTierAgencies = new Button("importTopTierAgencies", event -> agencyService.importTopTierAgencies());
         Button importTopTierAgencySummaries = new Button("importTopTierAgencySummaries", event -> agencyService.importTopTierAgencySummaries());
@@ -117,7 +116,7 @@ public class MainView extends VerticalLayout {
         Grid<TopTierAgency> grid = new Grid<>(TopTierAgency.class, true);
         List<TopTierAgency> agencies = agencyService.getAllTopTierAgencies();
         grid.setItems(agencies);
-        add(grid);
+        //add(grid);
 
     }
 

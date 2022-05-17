@@ -83,12 +83,14 @@ public class DbService {
         ResultSummary subComponentIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_component_id FOR (s:SubComponent) REQUIRE s.id IS UNIQUE;").in(database).run();
         ResultSummary subAgencyNameConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_agency_name FOR (s:SubAgency) REQUIRE s.name IS UNIQUE;").in(database).run();
         ResultSummary submissionPeriodCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT submission_period_composite FOR (s:SubmissionPeriod) ASSERT (s.submission_fiscal_year, s.submission_fiscal_quarter, s.submission_fiscal_month) IS NODE KEY;").in(database).run();
+        ResultSummary subAgencySummaryCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT subagency_summary_composite FOR (s:SubAgencySummary) ASSERT (s.toptier_code, s.fiscal_year) IS NODE KEY;").in(database).run();
 
         logResultSummaries("topTierAgencyIdConstraint", topTierAgencyIdConstraint);
         logResultSummaries("defCodeConstraint", defCodeConstraint);
         logResultSummaries("subComponentIdConstraint", subComponentIdConstraint);
         logResultSummaries("subAgencyNameConstraint", subAgencyNameConstraint);
-        logResultSummaries("submissionPeriodCompositeConstraint", subAgencyNameConstraint);
+        logResultSummaries("submissionPeriodCompositeConstraint", submissionPeriodCompositeConstraint);
+        logResultSummaries("subAgencySummaryCompositeConstraint", subAgencySummaryCompositeConstraint);
 
 //
 //        ResultSummary liveStreamTwitchIdIndex = client.query("CREATE INDEX FOR (l:LiveStream) ON (l.sully_id);").in(database).run();
