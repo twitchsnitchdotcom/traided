@@ -5,6 +5,7 @@ import com.traidable.app.dto.REFERENCE.agencyreference.AgencyReferenceResponseDT
 import org.neo4j.driver.summary.ResultSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import java.util.Map;
 
 @Service
 public class AgencyService {
+
+    @Value("${database}")
+    public static String database;
 
     private final PersistenceService persistenceService;
 
@@ -28,7 +32,7 @@ public class AgencyService {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         Long topTierAgencyCount = null;
-        Collection<Map<String, Object>> all = persistenceService.getClient().query("MATCH (t:TopTierAgency) RETURN count(t)").in(PersistenceService.database).fetch().all();
+        Collection<Map<String, Object>> all = persistenceService.getClient().query("MATCH (t:TopTierAgency) RETURN count(t)").in(database).fetch().all();
         for (Map<String, Object> objectMap : all) {
             for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
                     topTierAgencyCount = (Long) entry.getValue();
@@ -56,7 +60,7 @@ public class AgencyService {
                 "a.budget_authority_amount = agency.budget_authority_amount,\n" +
                 "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
                 "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
-                "a.agency_slug = agency.agency_slug;").in(PersistenceService.database).run();
+                "a.agency_slug = agency.agency_slug;").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importTopTierAgencies", all);
         log.trace("importTopTierAgencies took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");

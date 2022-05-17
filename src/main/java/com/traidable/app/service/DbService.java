@@ -15,6 +15,8 @@ import org.springframework.util.StopWatch;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.traidable.app.service.PersistenceService.logResultSummaries;
+
 @Service
 public class DbService {
 
@@ -25,7 +27,7 @@ public class DbService {
     @Value("${database}")
     private String database;
 
-    public DbService(PersistenceService persistenceService){
+    public DbService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;
     }
 
@@ -49,22 +51,16 @@ public class DbService {
     }
 
     public void addDB() {
-        if(database == null){
-            database = this.database;
-        }
         ResultSummary run = PersistenceService.getClient().query("CREATE DATABASE " + database).in(database).run();
-        PersistenceService.logResultSummaries("addDatabase", run);
+        logResultSummaries("addDatabase", run);
     }
 
     public void dropDB() {
-        if(database == null){
-            database = this.database;
-        }
         ResultSummary run = PersistenceService.getClient().query("DROP DATABASE " + database).in(database).run();
-        PersistenceService.logResultSummaries("dropDatabase", run);
+        logResultSummaries("dropDatabase", run);
     }
 
-    public void dropDBData(){
+    public void dropDBData() {
         ResultSummary run = PersistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
                 "'MATCH ()-[r]->() RETURN id(r) AS id', \n" +
                 "'MATCH ()-[r]->() WHERE id(r)=id DELETE r', \n" +
@@ -78,7 +74,7 @@ public class DbService {
 
     public void dropDBConstraints() {
         ResultSummary dropConstraints = PersistenceService.getClient().query("CALL apoc. schema. assert({}, {});").in(database).run();
-        PersistenceService.logResultSummaries("", dropConstraints);
+        logResultSummaries("", dropConstraints);
     }
 
     public void addDBConstraints() {
@@ -86,6 +82,11 @@ public class DbService {
         ResultSummary defCodeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT def_code FOR (d:DisasterEmergencyFunding) REQUIRE d.code IS UNIQUE;").in(database).run();
         ResultSummary subComponentIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_component_id FOR (s:SubComponent) REQUIRE s.id IS UNIQUE;").in(database).run();
         ResultSummary subAgencyNameConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_agency_name FOR (s:SubAgency) REQUIRE s.name IS UNIQUE;").in(database).run();
+
+        logResultSummaries("topTierAgencyIdConstraint", topTierAgencyIdConstraint);
+        logResultSummaries("defCodeConstraint", defCodeConstraint);
+        logResultSummaries("subComponentIdConstraint", subComponentIdConstraint);
+        logResultSummaries("subAgencyNameConstraint", subAgencyNameConstraint);
 
 //
 //        ResultSummary liveStreamTwitchIdIndex = client.query("CREATE INDEX FOR (l:LiveStream) ON (l.sully_id);").in(database).run();

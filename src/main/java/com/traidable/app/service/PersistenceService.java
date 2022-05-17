@@ -29,9 +29,6 @@ public class PersistenceService {
 
     private static Neo4jClient client;
 
-    @Value("${database}")
-    public static String database;
-
     @PostConstruct
     public static void initNeo4j() {
         Driver driver = GraphDatabase
@@ -75,6 +72,4 @@ public class PersistenceService {
     public static Neo4jClient getClient(){
         return client;
     }
-
-
 }
