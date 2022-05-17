@@ -1,0 +1,307 @@
+CREATE CONSTRAINT agency_id FOR (t:TopTierAgency) REQUIRE t.agency_id IS UNIQUE
+CREATE CONSTRAINT def_code FOR (d:DisasterEmergencyFunding) REQUIRE d.code IS UNIQUE
+CREATE CONSTRAINT sub_component_id FOR (s:SubComponent) REQUIRE s.id IS UNIQUE
+CREATE CONSTRAINT sub_agency_name FOR (s:SubAgency) REQUIRE s.name IS UNIQUE
+
+-----------------------------------------------------------------------------------------------------------
+
+
+MATCH (n) DETACH DELETE(n)
+
+call apoc.periodic.iterate(
+"MATCH (p) return id(p) AS id",
+"MATCH (n) WHERE id(n) = id DETACH DELETE n",
+{batchSize:1000})
+
+-----------------------------------------------------------------------------------------------------------
+FIND AN AGENCY PROFILE: https://www.usaspending.gov/agency
+
+       {
+            "agency_id": 456,
+            "toptier_code": "020",
+            "abbreviation": "TREAS",
+            "agency_name": "Department of the Treasury",
+            "congressional_justification_url": "https://www.treasury.gov/cj",
+            "active_fy": "2022",
+            "active_fq": "2",
+            "outlay_amount": 699149579482.52,
+            "obligated_amount": 716175426601.66,
+            "budget_authority_amount": 2974008709686.72,
+            "current_total_budget_authority_amount": 10874126173390.0,
+            "percentage_of_total_budget_authority": 0.2734940410167758,
+            "agency_slug": "department-of-the-treasury"
+        }
+
+
+CALL apoc.load.jsonParams("https://api.usaspending.gov/api/v2/references/toptier_agencies/?sort=percentage_of_total_budget_authority&order=desc",{Accept: "application/json"}, null) YIELD value
+UNWIND  value.results as agency
+CREATE (a:TopTierAgency{agency_id:agency.agency_id})
+SET a.toptier_code = agency.toptier_code,
+a.abbreviation = agency.abbreviation,
+a.agency_name = agency.agency_name,
+a.congressional_justification_url = agency.congressional_justification_url,
+a.active_fy = agency.active_fy,
+a.active_fq = agency.active_fq,
+a.outlay_amount = agency.outlay_amount,
+a.obligated_amount = agency.obligated_amount,
+a.budget_authority_amount = agency.budget_authority_amount,
+a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,
+a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,
+a.agency_slug = agency.agency_slug;
+
+-----------------------------------------------------------------------------------------------------------
+
+TOP TIER AGENCY INFO:
+
+https://api.usaspending.gov/api/v2/agency/012/
+
+{
+    "fiscal_year": 2022,
+    "toptier_code": "012",
+    "name": "Department of Agriculture",
+    "abbreviation": "USDA",
+    "agency_id": 95,
+    "icon_filename": "USDA.jpg",
+    "mission": "We provide leadership on food, agriculture, natural resources, rural development, nutrition, and related issues based on sound public policy, the best available science, and efficient management.",
+    "website": "https://www.usda.gov/",
+    "congressional_justification_url": "https://www.usda.gov/cj",
+    "about_agency_data": null,
+    "subtier_agency_count": 25,
+    "def_codes": [
+        {
+            "code": "1",
+            "public_law": "Non-emergency P.L. 117-58",
+            "title": "Infrastructure Investment and Jobs Act",
+            "urls": "https://www.congress.gov/117/plaws/publ58/PLAW-117publ58.pdf",
+            "disaster": null
+        },
+        {
+            "code": "A",
+            "public_law": "Emergency P.L. 115-56",
+            "title": "Supplemental Appropriations for Disaster Relief Requirements Act, 2017",
+            "urls": "https://www.congress.gov/115/plaws/publ56/PLAW-115publ56.htm",
+            "disaster": null
+        },
+        {
+            "code": "C",
+            "public_law": "Emergency P.L. 115-123",
+            "title": "Bipartisan Budget Act of 2018",
+            "urls": "https://www.congress.gov/115/plaws/publ123/PLAW-115publ123.htm",
+            "disaster": null
+        },
+        {
+            "code": "E",
+            "public_law": "Emergency P.L. 116-20",
+            "title": "Additional Supplemental Appropriations for Disaster Relief Act, 2019",
+            "urls": "https://www.congress.gov/116/plaws/publ20/PLAW-116publ20.pdf",
+            "disaster": null
+        },
+        {
+            "code": "I",
+            "public_law": "Emergency P.L. 116-94",
+            "title": "Further Consolidated Appropriations Act, 2020",
+            "urls": "https://www.congress.gov/bill/116th-congress/house-bill/1865/tex",
+            "disaster": null
+        },
+        {
+            "code": "M",
+            "public_law": "Emergency P.L. 116-127",
+            "title": "Families First Coronavirus Response Act",
+            "urls": "https://www.congress.gov/116/plaws/publ127/PLAW-116publ127.pdf",
+            "disaster": "covid_19"
+        },
+        {
+            "code": "N",
+            "public_law": "Emergency P.L. 116-136",
+            "title": "Coronavirus Aid, Relief, and Economic Security Act or the CARES Act",
+            "urls": "https://www.congress.gov/116/bills/hr748/BILLS-116hr748enr.pdf",
+            "disaster": "covid_19"
+        },
+        {
+            "code": "O",
+            "public_law": "Non-emergency P.L. 116-136|Non-emergency P.L. 116-139|Non-emergency P.L. 116-260",
+            "title": "Coronavirus Aid, Relief, and Economic Security Act or the CARES Act|Paycheck Protection Program and Health Care Enhancement Act|Consolidated Appropriations Act, 2021",
+            "urls": "https://www.congress.gov/116/bills/hr748/BILLS-116hr748enr.pdf|https://www.congress.gov/116/plaws/publ139/PLAW-116publ139.pdf",
+            "disaster": "covid_19"
+        },
+        {
+            "code": "Q",
+            "public_law": "Excluded from tracking (uses non-emergency/non-disaster designated appropriations)",
+            "title": null,
+            "urls": null,
+            "disaster": null
+        },
+        {
+            "code": "V",
+            "public_law": "Non-emergency P.L. 117-2",
+            "title": "American Rescue Plan Act of 2021",
+            "urls": "https://www.congress.gov/117/plaws/publ2/PLAW-117publ2.pdf",
+            "disaster": "covid_19"
+        },
+        {
+            "code": "X",
+            "public_law": "Emergency P.L. 117-43",
+            "title": "Extending Government Funding and Delivering Emergency Assistance Act",
+            "urls": "https://www.congress.gov/117/plaws/publ43/PLAW-117publ43.pdf",
+            "disaster": null
+        }
+    ],
+    "messages": []
+}
+
+CALL apoc.periodic.iterate(
+  'MATCH (a:TopTierAgency) RETURN a',
+  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/"  as url
+  CALL apoc.load.jsonParams(url,{Accept: "application/json"}, null) YIELD value
+  WITH a, value
+  SET a.icon_filename = value.icon_filename,
+  a.mission = value.mission,
+  a.website = value.website,
+  a.congressional_justification_url = value.congressional_justification_url
+    FOREACH (def in value.def_codes |
+            MERGE (d:DisasterEmergencyFunding{code:def.code})
+            SET d.public_law = def.public_law,
+            d.title = def.title,
+            d.urls = def.urls,
+            d.disaster = def.disaster
+            MERGE (a)-[:HAS_DEF]->(d))
+  ',
+{batchSize:1, parallel:true})
+
+-----------------------------------------------------------------------------------------------------------
+SUBMISSION PERIOD:  GENERAL:
+
+https://api.usaspending.gov/api/v2/references/submission_periods/
+
+       {
+            "period_start_date": "2022-03-01T00:00:00Z",
+            "period_end_date": "2022-03-31T00:00:00Z",
+            "submission_start_date": "2022-04-19T00:00:00Z",
+            "submission_due_date": "2022-04-29T00:00:00Z",
+            "certification_due_date": "2022-05-17T00:00:00Z",
+            "submission_reveal_date": "2022-04-29T01:41:09.474018Z",
+            "submission_fiscal_year": 2022,
+            "submission_fiscal_quarter": 2,
+            "submission_fiscal_month": 6,
+            "is_quarter": false
+        }
+
+CALL apoc.load.jsonParams("https://api.usaspending.gov/api/v2/references/submission_periods/",{Accept: "application/json"}, null) YIELD value
+UNWIND  value.available_periods as period
+CREATE (sp:SubmissionPeriod)
+SET sp.period_start_date = datetime(period.period_start_date),
+sp.period_end_date = datetime(period.period_end_date),
+sp.submission_start_date = datetime(period.submission_start_date),
+sp.submission_due_date = datetime(period.submission_due_date),
+sp.certification_due_date = datetime(period.certification_due_date),
+sp.submission_reveal_date = datetime(period.submission_reveal_date),
+sp.submission_fiscal_year = period.submission_fiscal_year,
+sp.submission_fiscal_quarter = period.submission_fiscal_quarter,
+sp.submission_fiscal_month = period.submission_fiscal_month,
+sp.is_quarter = period.is_quarter
+
+-----------------------------------------------------------------------------------------------------------
+SUBAGENCY COUNT:
+
+https://api.usaspending.gov/api/v2/agency/012/sub_agency/count/
+
+{
+    "toptier_code": "012",
+    "fiscal_year": 2022,
+    "sub_agency_count": 20,
+    "office_count": 346,
+    "messages": []
+}
+
+CALL apoc.periodic.iterate(
+  'MATCH (a:TopTierAgency) RETURN a',
+  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/sub_agency/count/"  as url
+  CALL apoc.load.jsonParams(url,{Accept: "application/json"}, null) YIELD value
+  WITH a, value
+  SET a.sub_agency_count = value.sub_agency_count,
+  a.office_count = value.office_count',
+{batchSize:1, parallel:true})
+
+
+
+-----------------------------------------------------------------------------------------------------------
+SUB AGENCY SET:
+
+https://api.usaspending.gov/api/v2/agency/012/sub_agency/?limit=100
+
+    "results": [
+        {
+            "name": "Food and Nutrition Service",
+            "abbreviation": "FNS",
+            "total_obligations": 104819314298.18,
+            "transaction_count": 5990,
+            "new_award_count": 1606,
+            "children": [
+                {
+                    "name": "SUPPLEMENTAL NUTRITIONAL ASST PROG",
+                    "code": "1234HK",
+                    "total_obligations": 82600830795.57,
+                    "transaction_count": 1830,
+                    "new_award_count": 536
+                }
+            ]
+        }
+
+//TODO it has issues with abbreviation being null
+
+CALL apoc.periodic.iterate(
+  'MATCH (a:TopTierAgency) WHERE NOT a.sub_agency_count=0 RETURN a',
+  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/sub_agency/?limit=100"  as url
+  CALL apoc.load.jsonParams(url,{Accept: "application/json"}, null) YIELD value
+  WITH a, value
+    FOREACH (sub in value.results |
+            MERGE (s:SubAgency{abbreviation:sub.abbreviation})
+            SET s.name = sub.name,
+            s.total_obligations = sub.total_obligations,
+            s.transaction_count = sub.transaction_count,
+            s.new_award_count = sub.new_award_count
+            MERGE (a)-[:HAS_SUBAGENCY]->(s))',
+{batchSize:1, parallel:true})
+
+
+-----------------------------------------------------------------------------------------------------------
+
+//todo some form of merging between sub components and sub agencies
+
+AGENCY SUB COMPONENT SET:
+
+https://api.usaspending.gov/api/v2/agency/012/sub_components/?limit=100
+
+"toptier_code": "012",
+    "fiscal_year": 2022,
+    "results": [
+        {
+            "name": "Food and Nutrition Service",
+            "id": "food-and-nutrition-service",
+            "total_obligations": 100037340878.05,
+            "total_outlays": 102900958070.34,
+            "total_budgetary_resources": 218353876771.34
+        },
+
+
+CALL apoc.periodic.iterate(
+  'MATCH (a:TopTierAgency) RETURN a',
+  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/sub_components/?limit=100"  as url
+  CALL apoc.load.jsonParams(url,{Accept: "application/json"}, null) YIELD value
+  WITH a, value
+    FOREACH (sub in value.results |
+            MERGE (s:SubComponent{id:sub.id})
+            SET s.name = sub.name,
+            s.total_obligations = sub.total_obligations,
+            s.total_outlays = sub.total_outlays,
+            s.total_budgetary_resources = sub.total_budgetary_resources
+            MERGE (a)-[:HAS_SUBCOMPONENT]->(s))
+  ',
+{batchSize:1, parallel:true})
+
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------

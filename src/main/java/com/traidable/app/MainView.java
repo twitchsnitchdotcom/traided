@@ -17,6 +17,11 @@ package com.traidable.app;
 
 import java.util.Locale;
 
+import com.traidable.app.service.AgencyService;
+import com.traidable.app.service.DbService;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
@@ -34,8 +39,15 @@ public class MainView extends VerticalLayout implements LocaleChangeObserver {
 
     private RouterLink link;
 
+    private final AgencyService agencyService;
+    private final DbService dbService;
+
     public MainView(@Autowired Greeter greeter,
-            @Autowired ExampleTemplate template) {
+            @Autowired ExampleTemplate template, AgencyService agencyService, DbService dbService) {
+
+        this.dbService = dbService;
+        this.agencyService = agencyService;
+
         H1 heading = new H1("Vaadin + Spring examples");
         
         Label greeting = new Label(greeter.sayHello());
@@ -55,6 +67,30 @@ public class MainView extends VerticalLayout implements LocaleChangeObserver {
         linkStyle.set("margin-bottom", "10px");
 
         add(heading, greeting, button, link, template);
+
+        //db info
+        H3 dbHeadline = new H3("DB INFO");
+        Div dbInfo = new Div();
+        dbInfo.setText(dbService.dbInfo());
+        Button addDB = new Button("addDB", event -> dbService.addDB());
+        Button dropDB = new Button("dropDB", event -> dbService.dropDB());
+        Button dropDBConstraints = new Button("dropDBConstraints", event -> dbService.dropDBConstraints());
+        Button addDBConstraints = new Button("addDBConstraints", event -> dbService.addDBConstraints());
+
+        add(dbHeadline);
+        add(new HorizontalLayout(dbInfo));
+        add(new HorizontalLayout(addDB, dropDB, dropDBConstraints, addDBConstraints));
+
+        //db
+        H3 agencyHeadline = new H3("AGENCY INFO");
+        Div agencyInfo = new Div();
+        agencyInfo.setText("Number of Agencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
+        Button importTopTierAgencies = new Button("addDB", event -> agencyService.importTopTierAgencies());
+
+        add(agencyHeadline);
+        add(new HorizontalLayout(agencyInfo));
+        add(new HorizontalLayout(importTopTierAgencies));
+
     }
 
     @Override
