@@ -47,8 +47,7 @@ public class MainView extends VerticalLayout {
     private final ReferenceService referenceService;
     private final DbService dbService;
 
-    public MainView(@Autowired Greeter greeter,
-            @Autowired ExampleTemplate template, AgencyService agencyService, DbService dbService, ReferenceService referenceService) {
+    public MainView(AgencyService agencyService, DbService dbService, ReferenceService referenceService) {
 
         this.dbService = dbService;
         this.agencyService = agencyService;
