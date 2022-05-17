@@ -42,7 +42,21 @@ public class AgencyService {
     public void importTopTierAgencies() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ResultSummary all = persistenceService.getClient().query("MATCH (t:TopTierAgency) RETURN count(t)").in(PersistenceService.database).run();
+        ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/?sort=percentage_of_total_budget_authority&order=desc\",{Accept: \"application/json\"}, null) YIELD value\n" +
+                "UNWIND  value.results as agency\n" +
+                "CREATE (a:TopTierAgency{agency_id:agency.agency_id})\n" +
+                "SET a.toptier_code = agency.toptier_code,\n" +
+                "a.abbreviation = agency.abbreviation,\n" +
+                "a.agency_name = agency.agency_name,\n" +
+                "a.congressional_justification_url = agency.congressional_justification_url,\n" +
+                "a.active_fy = agency.active_fy,\n" +
+                "a.active_fq = agency.active_fq,\n" +
+                "a.outlay_amount = agency.outlay_amount,\n" +
+                "a.obligated_amount = agency.obligated_amount,\n" +
+                "a.budget_authority_amount = agency.budget_authority_amount,\n" +
+                "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
+                "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
+                "a.agency_slug = agency.agency_slug;").in(PersistenceService.database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importTopTierAgencies", all);
         log.trace("importTopTierAgencies took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
