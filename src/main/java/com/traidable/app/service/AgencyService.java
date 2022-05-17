@@ -1,6 +1,7 @@
 package com.traidable.app.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.traidable.app.constants.FinancialConstants;
+import com.traidable.app.dto.AGENCY.subagencycount.SubAgencyCountResponseDTO;
 import com.traidable.app.dto.REFERENCE.agencyreference.AgencyReferenceResponseDTO;
 import com.traidable.app.entity.TopTierAgency;
 import com.traidable.app.repositories.TopTierAgencyRepository;
@@ -93,6 +94,56 @@ public class AgencyService {
         stopWatch.stop();
         PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
         log.trace("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+    }
+
+    public void importSubAgencySummary(){
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        //todo eventually a FY perspective of each view
+        for(int year: FinancialConstants.FISCAL_YEARS){
+        }
+        ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
+                "  'MATCH (a:TopTierAgency) RETURN a',\n" +
+                "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/sub_agency/count/\" as url\n" +
+                "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
+                "  WITH a, value\n" +
+                "  MERGE (s:SubAgencySummary{toptier_code:value.toptier_code,fiscal_year:value.fiscal_year })\n" +
+                "  SET s.sub_agency_count = value.sub_agency_count,\n" +
+                "  s.office_count = value.office_count\n" +
+                "  MERGE (a)-[:HAS_SUB_AGENCY]->(s)',\n" +
+                "{batchSize:1, parallel:true})").in(database).run();
+        stopWatch.stop();
+        PersistenceService.logResultSummaries("importSubAgencySummary", all);
+        log.trace("importSubAgencySummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+    }
+
+    public Long subAgencySummaryCountDB() {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        Long subAgencySummaryCountDB = null;
+        Collection<Map<String, Object>> all = persistenceService.getClient().query("MATCH (s:SubAgencySummary) RETURN count(s)").in(database).fetch().all();
+        for (Map<String, Object> objectMap : all) {
+            for (Map.Entry<String, Object> entry : objectMap.entrySet()) {
+                subAgencySummaryCountDB = (Long) entry.getValue();
+            }
+        }
+        stopWatch.stop();
+        log.trace("subAgencySummaryCountDB took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        return subAgencySummaryCountDB;
+    }
+
+    //todo can be extended to read the office counts as well
+    public Long subAgencySummaryCountAPI(){
+        Long total = 0L;
+        for(String code: FinancialConstants.TOP_TIER_AGENCY_CODES){
+            Long subAgencyCount = HTTPService.webClient.get()
+                    .uri("agency/" + code + "/sub_agency/count/")
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .retrieve()
+                    .bodyToMono(SubAgencyCountResponseDTO.class).block().getSubAgencyCount();
+            total = total + subAgencyCount;
+        }
+        return total;
     }
 
     public void importAgencyAwardSummary(){

@@ -12,13 +12,17 @@ https://api.usaspending.gov/api/v2/agency/012/sub_agency/count/
     "messages": []
 }
 
+
 CALL apoc.periodic.iterate(
-  'MATCH (a:TopTierAgency) RETURN a',
-  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/sub_agency/count/"  as url
+  'MERGE (s:SubAgencySummary) RETURN a',
+  'WITH a, "https://api.usaspending.gov/api/v2/agency/" + a.toptier_code +  "/sub_agency/count/" as url
   CALL apoc.load.jsonParams(url,{Accept: "application/json"}, null) YIELD value
   WITH a, value
-  SET a.sub_agency_count = value.sub_agency_count,
-  a.office_count = value.office_count',
+  MERGE (s:SubAgencySummary)
+  SET s.toptier_code = value.toptier_code,
+  s.fiscal_year = value.fiscal_year,
+  s.sub_agency_count = value.sub_agency_count,
+  s.office_count = value.office_count',
 {batchSize:1, parallel:true})
 
 
