@@ -48,25 +48,25 @@ public class MainView extends VerticalLayout implements LocaleChangeObserver {
         this.dbService = dbService;
         this.agencyService = agencyService;
 
-        H1 heading = new H1("Vaadin + Spring examples");
-        
-        Label greeting = new Label(greeter.sayHello());
-        Style grretingStyle = greeting.getElement().getStyle();
-        grretingStyle.set("display", "block");
-        grretingStyle.set("margin-bottom", "10px");
-
-        Button button = new Button("Switch language to Chinese",
-                event -> getUI().get().setLocale(Locale.CHINESE));
-
-        link = new RouterLink(
-                getTranslation("root.navigate_to_component"),
-                ViewComponent.class);
-
-        Style linkStyle = link.getElement().getStyle();
-        linkStyle.set("display", "block");
-        linkStyle.set("margin-bottom", "10px");
-
-        add(heading, greeting, button, link, template);
+//        H1 heading = new H1("Vaadin + Spring examples");
+//
+//        Label greeting = new Label(greeter.sayHello());
+//        Style grretingStyle = greeting.getElement().getStyle();
+//        grretingStyle.set("display", "block");
+//        grretingStyle.set("margin-bottom", "10px");
+//
+//        Button button = new Button("Switch language to Chinese",
+//                event -> getUI().get().setLocale(Locale.CHINESE));
+//
+//        link = new RouterLink(
+//                getTranslation("root.navigate_to_component"),
+//                ViewComponent.class);
+//
+//        Style linkStyle = link.getElement().getStyle();
+//        linkStyle.set("display", "block");
+//        linkStyle.set("margin-bottom", "10px");
+//
+//        add(heading, greeting, button, link, template);
 
         //db info
         H3 dbHeadline = new H3("DB INFO");
@@ -85,7 +85,7 @@ public class MainView extends VerticalLayout implements LocaleChangeObserver {
         H3 agencyHeadline = new H3("AGENCY INFO");
         Div agencyInfo = new Div();
         agencyInfo.setText("Number of Agencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
-        Button importTopTierAgencies = new Button("addDB", event -> agencyService.importTopTierAgencies());
+        Button importTopTierAgencies = new Button("importTopTierAgencies", event -> agencyService.importTopTierAgencies());
 
         add(agencyHeadline);
         add(new HorizontalLayout(agencyInfo));
