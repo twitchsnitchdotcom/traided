@@ -54,6 +54,8 @@ public class MainView extends VerticalLayout {
         this.referenceService = referenceService;
 
         H1 heading = new H1("Vaadin + Spring examples");
+
+        add(heading);
 //
 //        Label greeting = new Label(greeter.sayHello());
 //        Style grretingStyle = greeting.getElement().getStyle();
