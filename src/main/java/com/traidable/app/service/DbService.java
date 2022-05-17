@@ -25,7 +25,7 @@ public class DbService {
     private final PersistenceService persistenceService;
 
     @Value("${database}")
-    private String database;
+    public String database = "traided";
 
     public DbService(PersistenceService persistenceService) {
         this.persistenceService = persistenceService;

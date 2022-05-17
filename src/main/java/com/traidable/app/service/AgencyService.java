@@ -18,7 +18,7 @@ import java.util.Map;
 public class AgencyService {
 
     @Value("${database}")
-    public static String database;
+    public String database = "traided";
 
     private final PersistenceService persistenceService;
 
