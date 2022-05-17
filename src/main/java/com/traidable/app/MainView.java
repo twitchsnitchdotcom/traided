@@ -53,7 +53,7 @@ public class MainView extends VerticalLayout {
         this.agencyService = agencyService;
         this.referenceService = referenceService;
 
-//        H1 heading = new H1("Vaadin + Spring examples");
+        H1 heading = new H1("Vaadin + Spring examples");
 //
 //        Label greeting = new Label(greeter.sayHello());
 //        Style grretingStyle = greeting.getElement().getStyle();
