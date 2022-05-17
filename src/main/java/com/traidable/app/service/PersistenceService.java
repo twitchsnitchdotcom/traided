@@ -32,7 +32,7 @@ public class PersistenceService {
     @PostConstruct
     public static void initNeo4j() {
         Driver driver = GraphDatabase
-                .driver("neo4j://68.183.7.177:7687", AuthTokens.basic("neo4j", "admin"));
+                .driver("neo4j://134.209.188.67:7687", AuthTokens.basic("neo4j", "admin"));
         client = Neo4jClient.create(driver);
     }
 
