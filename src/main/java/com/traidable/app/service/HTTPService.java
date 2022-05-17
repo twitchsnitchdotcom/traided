@@ -29,7 +29,7 @@ public class HTTPService {
     @PostConstruct
     public static void init(){
         webClient = WebClient.builder()
-                .baseUrl("http://api.usaspending.gov/api/v2/")
+                .baseUrl("https://api.usaspending.gov/api/v2/")
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
