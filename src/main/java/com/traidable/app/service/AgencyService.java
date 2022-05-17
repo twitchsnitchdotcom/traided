@@ -2,6 +2,8 @@ package com.traidable.app.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.traidable.app.dto.REFERENCE.agencyreference.AgencyReferenceResponseDTO;
+import com.traidable.app.entity.TopTierAgency;
+import com.traidable.app.repositories.TopTierAgencyRepository;
 import org.neo4j.driver.summary.ResultSummary;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -21,9 +24,11 @@ public class AgencyService {
     public String database = "traided";
 
     private final PersistenceService persistenceService;
+    private final TopTierAgencyRepository topTierAgencyRepository;
 
-    public AgencyService(PersistenceService persistenceService){
+    public AgencyService(PersistenceService persistenceService, TopTierAgencyRepository topTierAgencyRepository){
         this.persistenceService = persistenceService;
+        this.topTierAgencyRepository = topTierAgencyRepository;
     }
 
     private final static Logger log = LoggerFactory.getLogger(AgencyService.class);
@@ -72,5 +77,9 @@ public class AgencyService {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .retrieve()
                 .bodyToMono(AgencyReferenceResponseDTO.class).block().getResults().size();
+    }
+
+    public List<TopTierAgency> getAllTopTierAgencies(){
+        return topTierAgencyRepository.findAll();
     }
 }

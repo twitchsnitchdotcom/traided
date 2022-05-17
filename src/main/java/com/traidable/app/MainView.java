@@ -15,10 +15,13 @@
  */
 package com.traidable.app;
 
+import java.util.List;
 import java.util.Locale;
 
+import com.traidable.app.entity.TopTierAgency;
 import com.traidable.app.service.AgencyService;
 import com.traidable.app.service.DbService;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -90,6 +93,11 @@ public class MainView extends VerticalLayout {
         add(agencyHeadline);
         add(new HorizontalLayout(agencyInfo));
         add(new HorizontalLayout(importTopTierAgencies));
+
+        Grid<TopTierAgency> grid = new Grid<>(TopTierAgency.class, true);
+        List<TopTierAgency> agencies = agencyService.getAllTopTierAgencies();
+        grid.setItems(agencies);
+        add(grid);
 
     }
 
