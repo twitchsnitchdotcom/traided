@@ -12,7 +12,12 @@ public class TopTierAgency {
     @Id
     @GeneratedValue
     private Long id;
-
+    @Property("icon_filename")
+    private String iconFilename;
+    @Property("mission")
+    private String mission;
+    @Property("website")
+    private String website;
     @Property("agency_id")
     private Long agencyId;
     @Property("toptier_code")
@@ -39,6 +44,32 @@ public class TopTierAgency {
     private Double percentageOfTotalBudgetAuthority;
     @Property("agency_slug")
     private String agencySlug;
+
+
+
+    public String getIconFilename() {
+        return iconFilename;
+    }
+
+    public void setIconFilename(String iconFilename) {
+        this.iconFilename = iconFilename;
+    }
+
+    public String getMission() {
+        return mission;
+    }
+
+    public void setMission(String mission) {
+        this.mission = mission;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
 
     public Long getId() {
         return id;

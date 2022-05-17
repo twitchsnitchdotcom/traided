@@ -21,6 +21,7 @@ import java.util.Locale;
 import com.traidable.app.entity.TopTierAgency;
 import com.traidable.app.service.AgencyService;
 import com.traidable.app.service.DbService;
+import com.traidable.app.service.ReferenceService;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H3;
@@ -43,13 +44,15 @@ public class MainView extends VerticalLayout {
     private RouterLink link;
 
     private final AgencyService agencyService;
+    private final ReferenceService referenceService;
     private final DbService dbService;
 
     public MainView(@Autowired Greeter greeter,
-            @Autowired ExampleTemplate template, AgencyService agencyService, DbService dbService) {
+            @Autowired ExampleTemplate template, AgencyService agencyService, DbService dbService, ReferenceService referenceService) {
 
         this.dbService = dbService;
         this.agencyService = agencyService;
+        this.referenceService = referenceService;
 
 //        H1 heading = new H1("Vaadin + Spring examples");
 //
@@ -84,15 +87,32 @@ public class MainView extends VerticalLayout {
         add(new HorizontalLayout(dbInfo));
         add(new HorizontalLayout(addDB, dropDB, dropDBConstraints, addDBConstraints));
 
-        //db
+        //reference info
+        H3 referenceHeadline = new H3("REFERENCE INFO");
+        Div referenceInfo = new Div();
+        referenceInfo.setText("Number of SubmissionPeriods: DB: " + referenceService.submissionPeriodsCountDB() + "  | API: " + referenceService.submissionPeriodsCountAPI());
+        Button importSubmissionPeriods = new Button("importSubmissionPeriods", event -> referenceService.importSubmissionPeriods());
+
+        add(referenceHeadline);
+        add(new HorizontalLayout(referenceInfo));
+        add(new HorizontalLayout(importSubmissionPeriods));
+
+        //agency Info
         H3 agencyHeadline = new H3("AGENCY INFO");
+
         Div agencyInfo = new Div();
         agencyInfo.setText("Number of Agencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
+
+        Div subAgencyInfo = new Div();
+        subAgencyInfo.setText("Number of SubAgencies: DB: " + agencyService.topTierAgencyCountDB() + "  | API: " + agencyService.topTierAgencyCountAPI());
+
+
         Button importTopTierAgencies = new Button("importTopTierAgencies", event -> agencyService.importTopTierAgencies());
+        Button importTopTierAgencySummaries = new Button("importTopTierAgencySummaries", event -> agencyService.importTopTierAgencySummaries());
 
         add(agencyHeadline);
         add(new HorizontalLayout(agencyInfo));
-        add(new HorizontalLayout(importTopTierAgencies));
+        add(new HorizontalLayout(importTopTierAgencies, importTopTierAgencySummaries));
 
         Grid<TopTierAgency> grid = new Grid<>(TopTierAgency.class, true);
         List<TopTierAgency> agencies = agencyService.getAllTopTierAgencies();
