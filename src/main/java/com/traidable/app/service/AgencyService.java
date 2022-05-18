@@ -82,14 +82,14 @@ public class AgencyService {
                 "  WITH a, value\n" +
                 "  SET a.icon_filename = value.icon_filename,\n" +
                 "  a.mission = value.mission,\n" +
-                "  a.website = value.website\n" +
-                "    FOREACH (def in value.def_codes |\n" +
-                "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
-                "            SET d.public_law = def.public_law,\n" +
-                "            d.title = def.title,\n" +
-                "            d.urls = def.urls,\n" +
-                "            d.disaster = def.disaster\n" +
-                "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
+                "  a.website = value.website',\n" +
+//                "    FOREACH (def in value.def_codes |\n" +
+//                "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
+//                "            SET d.public_law = def.public_law,\n" +
+//                "            d.title = def.title,\n" +
+//                "            d.urls = def.urls,\n" +
+//                "            d.disaster = def.disaster\n" +
+//                "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
                 "{batchSize:1, parallel:true})").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
