@@ -54,10 +54,11 @@ public class MainView extends VerticalLayout {
         this.referenceService = referenceService;
 
         H1 heading = new H1("BIG IMPORTER");
-        Button BIGIMPORTER = new Button("BIG IMPORTER", event -> bigImporter());
+        Button bigImporter = new Button("BIG IMPORTER", event -> bigImporter());
 
 
-        add(heading, BIGIMPORTER);
+        add(heading);
+        add(new HorizontalLayout(bigImporter));
 
         //db info
         H3 dbHeadline = new H3("DB INFO");

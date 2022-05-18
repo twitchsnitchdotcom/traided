@@ -77,7 +77,7 @@ public class AgencyService {
         stopWatch.start();
             ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
                     "  'MATCH (a:TopTierAgency) WHERE RETURN a',\n" +
-                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/" + "\"  as url\n" +
+                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/\"  as url\n" +
                     "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
                     "  WITH a, value\n" +
                     "  SET a.icon_filename = value.icon_filename,\n" +
