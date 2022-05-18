@@ -84,7 +84,7 @@ public class DbService {
         ResultSummary defCodeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT def_code FOR (d:DisasterEmergencyFunding) REQUIRE d.code IS UNIQUE;").in(database).run();
         ResultSummary subComponentIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_component_id FOR (s:SubComponent) REQUIRE s.id IS UNIQUE;").in(database).run();
         ResultSummary subAgencyNameConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_agency_name FOR (s:SubAgency) REQUIRE s.name IS UNIQUE;").in(database).run();
-        ResultSummary submissionPeriodCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT submission_period_composite FOR (s:SubmissionPeriod) REQUIRE (s.submission_fiscal_year, s.submission_fiscal_quarter, s.submission_fiscal_month) IS NODE KEY;").in(database).run();
+        //ResultSummary submissionPeriodCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT submission_period_composite FOR (s:SubmissionPeriod) REQUIRE (s.submission_fiscal_year, s.submission_fiscal_quarter, s.submission_fiscal_month) IS NODE KEY;").in(database).run();
         ResultSummary subAgencySummaryCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT subagency_summary_composite FOR (s:SubAgencySummary) REQUIRE (s.toptier_code, s.fiscal_year) IS NODE KEY;").in(database).run();
 
         logResultSummaries("topTierAgencyIdConstraint", topTierAgencyIdConstraint);
