@@ -75,25 +75,25 @@ public class AgencyService {
     public void importTopTierAgencySummaries() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-            ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
-                    "  'MATCH (a:TopTierAgency) WHERE RETURN a',\n" +
-                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/\"  as url\n" +
-                    "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
-                    "  WITH a, value\n" +
-                    "  SET a.icon_filename = value.icon_filename,\n" +
-                    "  a.mission = value.mission,\n" +
-                    "  a.website = value.website\n" +
-                    "    FOREACH (def in value.def_codes |\n" +
-                    "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
-                    "            SET d.public_law = def.public_law,\n" +
-                    "            d.title = def.title,\n" +
-                    "            d.urls = def.urls,\n" +
-                    "            d.disaster = def.disaster\n" +
-                    "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
-                    "{batchSize:1, parallel:true})").in(database).run();
-            PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
+        ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
+                "  'MATCH (a:TopTierAgency) RETURN a',\n" +
+                "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/\"  as url\n" +
+                "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
+                "  WITH a, value\n" +
+                "  SET a.icon_filename = value.icon_filename,\n" +
+                "  a.mission = value.mission,\n" +
+                "  a.website = value.website\n" +
+                "    FOREACH (def in value.def_codes |\n" +
+                "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
+                "            SET d.public_law = def.public_law,\n" +
+                "            d.title = def.title,\n" +
+                "            d.urls = def.urls,\n" +
+                "            d.disaster = def.disaster\n" +
+                "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
+                "{batchSize:1, parallel:true})").in(database).run();
         stopWatch.stop();
-        log.debug("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
+        log.trace("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importSubAgencySummary(){
