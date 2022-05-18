@@ -57,7 +57,7 @@ public class MainView extends VerticalLayout {
         Button BIGIMPORTER = new Button("BIG IMPORTER", event -> bigImporter());
 
 
-        add(heading);
+        add(heading, BIGIMPORTER);
 
         //db info
         H3 dbHeadline = new H3("DB INFO");

@@ -55,7 +55,7 @@ public class AgencyService {
         for(int year: FinancialConstants.FISCAL_YEARS) {
             ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/?fiscal_year=" + year + "\",{Accept: \"application/json\"}, null) YIELD value\n" +
                     "UNWIND  value.results as agency\n" +
-                    "CREATE (a:TopTierAgency{agency_id:agency.agency_id, active_fy:agency.active_fy})\n" +
+                    "MERGE (a:TopTierAgency{agency_id:agency.agency_id, active_fy:agency.active_fy})\n" +
                     "SET a.toptier_code = agency.toptier_code,\n" +
                     "a.abbreviation = agency.abbreviation,\n" +
                     "a.agency_name = agency.agency_name,\n" +
