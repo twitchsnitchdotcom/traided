@@ -59,6 +59,7 @@ public class AgencyService {
                     "SET a.toptier_code = agency.toptier_code,\n" +
                     "a.abbreviation = agency.abbreviation,\n" +
                     "a.agency_name = agency.agency_name,\n" +
+                    "a:FY" + year + ",\n" +
                     "a.congressional_justification_url = agency.congressional_justification_url,\n" +
                     "a.active_fq = agency.active_fq,\n" +
                     "a.outlay_amount = agency.outlay_amount,\n" +
