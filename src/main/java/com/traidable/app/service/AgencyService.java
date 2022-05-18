@@ -52,24 +52,22 @@ public class AgencyService {
     public void importTopTierAgencies() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        for(int year: FinancialConstants.FISCAL_YEARS) {
-            ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/?fiscal_year=" + year + "\",{Accept: \"application/json\"}, null) YIELD value\n" +
+            ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/\",{Accept: \"application/json\"}, null) YIELD value\n" +
                     "UNWIND  value.results as agency\n" +
                     "MERGE (a:TopTierAgency{agency_id:agency.agency_id, active_fy:agency.active_fy})\n" +
                     "SET a.toptier_code = agency.toptier_code,\n" +
                     "a.abbreviation = agency.abbreviation,\n" +
                     "a.agency_name = agency.agency_name,\n" +
-                    "a:FY" + year + ",\n" +
                     "a.congressional_justification_url = agency.congressional_justification_url,\n" +
                     "a.active_fq = agency.active_fq,\n" +
-                    "a.outlay_amount = agency.outlay_amount,\n" +
-                    "a.obligated_amount = agency.obligated_amount,\n" +
-                    "a.budget_authority_amount = agency.budget_authority_amount,\n" +
-                    "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
-                    "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
+//                    "a.outlay_amount = agency.outlay_amount,\n" +
+//                    "a.obligated_amount = agency.obligated_amount,\n" +
+//                    "a.budget_authority_amount = agency.budget_authority_amount,\n" +
+//                    "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
+//                    "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
                     "a.agency_slug = agency.agency_slug;").in(database).run();
             PersistenceService.logResultSummaries("importTopTierAgencies", all);
-        }
+
         stopWatch.stop();
         log.debug("importTopTierAgencies took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
@@ -77,10 +75,9 @@ public class AgencyService {
     public void importTopTierAgencySummaries() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        for(int year: FinancialConstants.FISCAL_YEARS){
             ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
                     "  'MATCH (a:TopTierAgency) WHERE RETURN a',\n" +
-                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/?fiscal_year=" + year + "\"  as url\n" +
+                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/" + "\"  as url\n" +
                     "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
                     "  WITH a, value\n" +
                     "  SET a.icon_filename = value.icon_filename,\n" +
@@ -95,7 +92,6 @@ public class AgencyService {
                     "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
                     "{batchSize:1, parallel:true})").in(database).run();
             PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
-        }
         stopWatch.stop();
         log.debug("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
