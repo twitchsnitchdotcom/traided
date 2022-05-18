@@ -80,18 +80,19 @@ public class DbService {
     //"CREATE CONSTRAINT submission_period_composite FOR (s:SubmissionPeriod) ASSERT (s.submission_fiscal_year, s.submission_fiscal_quarter, s.submission_fiscal_month) IS NODE KEY;
     //Caused by: org.neo4j.driver.exceptions.ClientException: Invalid constraint syntax, FOR should not be used in combination with ASSERT. Replace ASSERT with REQUIRE. (line 1, column 1 (offset: 0))
     public void addDBConstraints() {
-        ResultSummary topTierAgencyIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT agency_id FOR (t:TopTierAgency) REQUIRE t.agency_id IS UNIQUE;").in(database).run();
+        //ResultSummary topTierAgencyIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT agency_id FOR (t:TopTierAgency) REQUIRE t.agency_id IS UNIQUE;").in(database).run();
         ResultSummary defCodeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT def_code FOR (d:DisasterEmergencyFunding) REQUIRE d.code IS UNIQUE;").in(database).run();
         ResultSummary subComponentIdConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_component_id FOR (s:SubComponent) REQUIRE s.id IS UNIQUE;").in(database).run();
         ResultSummary subAgencyNameConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT sub_agency_name FOR (s:SubAgency) REQUIRE s.name IS UNIQUE;").in(database).run();
         //ResultSummary submissionPeriodCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT submission_period_composite FOR (s:SubmissionPeriod) REQUIRE (s.submission_fiscal_year, s.submission_fiscal_quarter, s.submission_fiscal_month) IS NODE KEY;").in(database).run();
         ResultSummary subAgencySummaryCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT subagency_summary_composite FOR (s:SubAgencySummary) REQUIRE (s.toptier_code, s.fiscal_year) IS NODE KEY;").in(database).run();
+        ResultSummary topTierAgencyIdCompositeConstraint = PersistenceService.getClient().query("CREATE CONSTRAINT toptier_composite FOR (t:TopTierAgency) REQUIRE (t.agency_id, t.active_fy) IS NODE KEY;").in(database).run();
 
-        logResultSummaries("topTierAgencyIdConstraint", topTierAgencyIdConstraint);
+        //logResultSummaries("topTierAgencyIdConstraint", topTierAgencyIdConstraint);
         logResultSummaries("defCodeConstraint", defCodeConstraint);
         logResultSummaries("subComponentIdConstraint", subComponentIdConstraint);
         logResultSummaries("subAgencyNameConstraint", subAgencyNameConstraint);
-        logResultSummaries("submissionPeriodCompositeConstraint", submissionPeriodCompositeConstraint);
+        //logResultSummaries("submissionPeriodCompositeConstraint", submissionPeriodCompositeConstraint);
         logResultSummaries("subAgencySummaryCompositeConstraint", subAgencySummaryCompositeConstraint);
 
 //

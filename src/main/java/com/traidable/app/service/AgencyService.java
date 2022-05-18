@@ -45,61 +45,63 @@ public class AgencyService {
             }
         }
         stopWatch.stop();
-        log.trace("topTierAgencyCount took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("topTierAgencyCount took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
         return topTierAgencyCount;
     }
 
     public void importTopTierAgencies() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/?sort=percentage_of_total_budget_authority&order=desc\",{Accept: \"application/json\"}, null) YIELD value\n" +
-                "UNWIND  value.results as agency\n" +
-                "CREATE (a:TopTierAgency{agency_id:agency.agency_id})\n" +
-                "SET a.toptier_code = agency.toptier_code,\n" +
-                "a.abbreviation = agency.abbreviation,\n" +
-                "a.agency_name = agency.agency_name,\n" +
-                "a.congressional_justification_url = agency.congressional_justification_url,\n" +
-                "a.active_fy = agency.active_fy,\n" +
-                "a.active_fq = agency.active_fq,\n" +
-                "a.outlay_amount = agency.outlay_amount,\n" +
-                "a.obligated_amount = agency.obligated_amount,\n" +
-                "a.budget_authority_amount = agency.budget_authority_amount,\n" +
-                "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
-                "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
-                "a.agency_slug = agency.agency_slug;").in(database).run();
+        for(int year: FinancialConstants.FISCAL_YEARS) {
+            ResultSummary all = persistenceService.getClient().query("CALL apoc.load.jsonParams(\"https://api.usaspending.gov/api/v2/references/toptier_agencies/?fiscal_year=" + year + "\",{Accept: \"application/json\"}, null) YIELD value\n" +
+                    "UNWIND  value.results as agency\n" +
+                    "CREATE (a:TopTierAgency{agency_id:agency.agency_id, active_fy:agency.active_fy})\n" +
+                    "SET a.toptier_code = agency.toptier_code,\n" +
+                    "a.abbreviation = agency.abbreviation,\n" +
+                    "a.agency_name = agency.agency_name,\n" +
+                    "a.congressional_justification_url = agency.congressional_justification_url,\n" +
+                    "a.active_fq = agency.active_fq,\n" +
+                    "a.outlay_amount = agency.outlay_amount,\n" +
+                    "a.obligated_amount = agency.obligated_amount,\n" +
+                    "a.budget_authority_amount = agency.budget_authority_amount,\n" +
+                    "a.current_total_budget_authority_amount = agency.current_total_budget_authority_amount,\n" +
+                    "a.percentage_of_total_budget_authority = agency.percentage_of_total_budget_authority,\n" +
+                    "a.agency_slug = agency.agency_slug;").in(database).run();
+            PersistenceService.logResultSummaries("importTopTierAgencies", all);
+        }
         stopWatch.stop();
-        PersistenceService.logResultSummaries("importTopTierAgencies", all);
-        log.trace("importTopTierAgencies took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importTopTierAgencies took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importTopTierAgencySummaries() {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
-                "  'MATCH (a:TopTierAgency) RETURN a',\n" +
-                "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/\"  as url\n" +
-                "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
-                "  WITH a, value\n" +
-                "  SET a.icon_filename = value.icon_filename,\n" +
-                "  a.mission = value.mission,\n" +
-                "  a.website = value.website\n" +
-                "    FOREACH (def in value.def_codes |\n" +
-                "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
-                "            SET d.public_law = def.public_law,\n" +
-                "            d.title = def.title,\n" +
-                "            d.urls = def.urls,\n" +
-                "            d.disaster = def.disaster\n" +
-                "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
-                "{batchSize:1, parallel:true})").in(database).run();
+        for(int year: FinancialConstants.FISCAL_YEARS){
+            ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
+                    "  'MATCH (a:TopTierAgency) WHERE RETURN a',\n" +
+                    "  'WITH a, \"https://api.usaspending.gov/api/v2/agency/\" + a.toptier_code +  \"/?fiscal_year=" + year + "\"  as url\n" +
+                    "  CALL apoc.load.jsonParams(url,{Accept: \"application/json\"}, null) YIELD value\n" +
+                    "  WITH a, value\n" +
+                    "  SET a.icon_filename = value.icon_filename,\n" +
+                    "  a.mission = value.mission,\n" +
+                    "  a.website = value.website\n" +
+                    "    FOREACH (def in value.def_codes |\n" +
+                    "            MERGE (d:DisasterEmergencyFunding{code:def.code})\n" +
+                    "            SET d.public_law = def.public_law,\n" +
+                    "            d.title = def.title,\n" +
+                    "            d.urls = def.urls,\n" +
+                    "            d.disaster = def.disaster\n" +
+                    "            MERGE (a)-[:HAS_DISASTER_EMERGENCY_FUNDING]->(d))',\n" +
+                    "{batchSize:1, parallel:true})").in(database).run();
+            PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
+        }
         stopWatch.stop();
-        PersistenceService.logResultSummaries("importTopTierAgencySummaries", all);
-        log.trace("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importTopTierAgencySummaries took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importSubAgencySummary(){
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
-        //todo eventually a FY perspective of each view
         for(int year: FinancialConstants.FISCAL_YEARS){
         }
         ResultSummary all = persistenceService.getClient().query("CALL apoc.periodic.iterate(\n" +
@@ -114,7 +116,7 @@ public class AgencyService {
                 "{batchSize:1, parallel:true})").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importSubAgencySummary", all);
-        log.trace("importSubAgencySummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importSubAgencySummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public Long subAgencySummaryCountDB() {
@@ -128,7 +130,7 @@ public class AgencyService {
             }
         }
         stopWatch.stop();
-        log.trace("subAgencySummaryCountDB took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("subAgencySummaryCountDB took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
         return subAgencySummaryCountDB;
     }
 
@@ -152,7 +154,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyAwardSummary", all);
-        log.trace("importAgencyAwardSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyAwardSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importAgencyBudgetSummary(){
@@ -161,7 +163,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyBudgetSummary", all);
-        log.trace("importAgencyBudgetSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyBudgetSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importAgencyBudgetaryResourcesSummary(){
@@ -170,7 +172,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyBudgetaryResourcesSummary", all);
-        log.trace("importAgencyBudgetaryResourcesSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyBudgetaryResourcesSummary took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importAgencyFederalAccounts(){
@@ -179,7 +181,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyFederalAccounts", all);
-        log.trace("importAgencyFederalAccounts took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyFederalAccounts took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importAgencyObjectClasses(){
@@ -188,7 +190,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyObjectClasses", all);
-        log.trace("importAgencyObjectClasses took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyObjectClasses took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public void importAgencyOverviewNewAwards(){
@@ -197,7 +199,7 @@ public class AgencyService {
         ResultSummary all = persistenceService.getClient().query("").in(database).run();
         stopWatch.stop();
         PersistenceService.logResultSummaries("importAgencyOverviewNewAwards", all);
-        log.trace("importAgencyOverviewNewAwards took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
+        log.debug("importAgencyOverviewNewAwards took: " + stopWatch.getLastTaskTimeMillis() / 1000 + " seconds");
     }
 
     public Integer topTierAgencyCountAPI(){
