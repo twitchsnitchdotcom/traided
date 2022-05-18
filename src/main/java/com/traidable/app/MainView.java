@@ -53,27 +53,11 @@ public class MainView extends VerticalLayout {
         this.agencyService = agencyService;
         this.referenceService = referenceService;
 
-        H1 heading = new H1("Vaadin + Spring examples");
+        H1 heading = new H1("BIG IMPORTER");
+        Button BIGIMPORTER = new Button("BIG IMPORTER", event -> bigImporter());
+
 
         add(heading);
-//
-//        Label greeting = new Label(greeter.sayHello());
-//        Style grretingStyle = greeting.getElement().getStyle();
-//        grretingStyle.set("display", "block");
-//        grretingStyle.set("margin-bottom", "10px");
-//
-//        Button button = new Button("Switch language to Chinese",
-//                event -> getUI().get().setLocale(Locale.CHINESE));
-//
-//        link = new RouterLink(
-//                getTranslation("root.navigate_to_component"),
-//                ViewComponent.class);
-//
-//        Style linkStyle = link.getElement().getStyle();
-//        linkStyle.set("display", "block");
-//        linkStyle.set("margin-bottom", "10px");
-//
-//        add(heading, greeting, button, link, template);
 
         //db info
         H3 dbHeadline = new H3("DB INFO");
@@ -81,12 +65,13 @@ public class MainView extends VerticalLayout {
         dbInfo.setText(dbService.dbInfo());
         Button addDB = new Button("addDB", event -> dbService.addDB());
         Button dropDB = new Button("dropDB", event -> dbService.dropDB());
+        Button deleteData = new Button("deleteData", event -> dbService.dropDBData());
         Button dropDBConstraints = new Button("dropDBConstraints", event -> dbService.dropDBConstraints());
         Button addDBConstraints = new Button("addDBConstraints", event -> dbService.addDBConstraints());
 
         add(dbHeadline);
         add(new HorizontalLayout(dbInfo));
-        add(new HorizontalLayout(addDB, dropDB, dropDBConstraints, addDBConstraints));
+        add(new HorizontalLayout(addDB, dropDB, dropDBConstraints, addDBConstraints, deleteData));
 
         //reference info
         H3 referenceHeadline = new H3("REFERENCE INFO");
@@ -119,6 +104,14 @@ public class MainView extends VerticalLayout {
         grid.setItems(agencies);
         add(grid);
 
+    }
+
+    public void bigImporter(){
+        dbService.dropDBData();
+        dbService.dropDBConstraints();
+        dbService.addDBConstraints();
+        agencyService.importTopTierAgencies();
+        //referenceService.importSubmissionPeriods();
     }
 
 //    @Override
